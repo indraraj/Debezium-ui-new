@@ -3,7 +3,6 @@
 import React from 'react';
 import { ActionsColumn, IAction, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { ConnectorStatusComponent, ConnectorTask, ConnectorTypeLogo } from '@app/components';
-import { ConnectorInfo, ConnectorStatus } from '@app/utils/Connector';
 import { AppLayoutContext, NotificationProps } from '@app/AppLayout';
 import { Services } from '@app/apis/services';
 import {

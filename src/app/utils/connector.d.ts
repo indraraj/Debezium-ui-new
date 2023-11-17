@@ -1,35 +1,35 @@
-export interface Info {
+interface Info {
   name: string;
   config: Record<string, string>;
   tasks?: InfoTasks[] | null;
   type: string;
 }
-export interface InfoTasks {
+interface InfoTasks {
   connector: string;
   task: number;
 }
 
-export interface ConnectorInfo {
-    info: Info;
+interface ConnectorInfo {
+  info: Info;
 }
 
-export interface Status {
+interface Status {
   name: string;
   connector: Connector;
   tasks?: StatusTasks[] | null;
   type: string;
 }
-export interface Connector {
+interface Connector {
   state: string;
   worker_id: string;
 }
-export interface StatusTasks {
+interface StatusTasks {
   id: number;
   state: string;
   worker_id: string;
   trace: string;
 }
 
-export interface ConnectorStatus {
-    status: Status;
+interface ConnectorStatus {
+  status: Status;
 }

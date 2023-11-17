@@ -1,4 +1,4 @@
-import { StatusTasks } from '@app/utils/Connector';
+
 import { Flex, FlexItem, HelperText, HelperTextItem, Label, Popover } from '@patternfly/react-core';
 import React from 'react';
 

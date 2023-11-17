@@ -26,7 +26,6 @@ import { CubesIcon, FilterIcon, SortAmountDownIcon } from '@patternfly/react-ico
 import ConnectorTable from './ConnectorTable';
 import { isEmpty, isNull } from 'lodash';
 import useFetchApi from '@app/hooks/useFetchApi';
-import { ConnectorInfo, ConnectorStatus } from '@app/utils/Connector';
 
 const ConnectorPage: React.FunctionComponent = () => {
   // const [loading, setLoading] = React.useState<boolean>(false);
