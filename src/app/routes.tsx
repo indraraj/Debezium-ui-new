@@ -1,19 +1,19 @@
-import * as React from 'react';
-import { Route, RouteComponentProps, Switch, useLocation } from 'react-router-dom';
+import * as React from "react";
+import { Route, RouteProps, Routes, useLocation } from "react-router-dom";
 // import { Dashboard } from '@app/pages/connectorDashboard/Dashboard';
 // import { Support } from '@app/Support/Support';
 // import { GeneralSettings } from '@app/Settings/General/GeneralSettings';
 // import { ProfileSettings } from '@app/Settings/Profile/ProfileSettings';
 import { NotFound } from '@app/NotFound/NotFound';
-import { useDocumentTitle } from '@app/utils/useDocumentTitle';
-import { ConnectorPage } from './pages/connector';
-import { Dashboard } from './pages/connectorDashboard/Dashboard';
+import { useDocumentTitle } from "@app/utils/useDocumentTitle";
+import { ConnectorPage } from "./pages/connector";
+import { ConnectorPlugins, CreateConnectorWizard } from "./pages/createConnector";
 
 let routeFocusTimer: number;
 export interface IAppRoute {
   label?: string; // Excluding the label will exclude the route from the nav sidebar in AppLayout
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  component: React.ComponentType<RouteComponentProps<any>> | React.ComponentType<any>;
+  component: React.ComponentType<any>;
   /* eslint-enable @typescript-eslint/no-explicit-any */
   exact?: boolean;
   path: string;
@@ -32,16 +32,16 @@ const routes: AppRouteConfig[] = [
   {
     component: ConnectorPage,
     exact: true,
-    label: 'Connector list',
-    path: '/',
-    title: 'Debezium | Connector List',
+    label: "Connector list",
+    path: "/",
+    title: "Debezium | Connector List",
   },
   {
-    component: Dashboard,
+    component: CreateConnectorWizard,
     exact: true,
-    label: 'Create connector',
-    path: '/create-connector',
-    title: 'Debezium | Create connector',
+    label: "Create connector",
+    path: "/create-connector",
+    title: "Debezium | Create connector",
   },
   // {
   //   label: 'Settings',
@@ -72,7 +72,7 @@ const useA11yRouteChange = () => {
   const { pathname } = useLocation();
   React.useEffect(() => {
     routeFocusTimer = window.setTimeout(() => {
-      const mainContainer = document.getElementById('primary-app-container');
+      const mainContainer = document.getElementById("primary-app-container");
       if (mainContainer) {
         mainContainer.focus();
       }
@@ -83,34 +83,56 @@ const useA11yRouteChange = () => {
   }, [pathname]);
 };
 
-const RouteWithTitleUpdates = ({ component: Component, title, ...rest }: IAppRoute) => {
-  useA11yRouteChange();
-  useDocumentTitle(title);
+// const RouteWithTitleUpdates = ({
+//   component: Component,
+//   title,
+//   ...rest
+// }: IAppRoute) => {
+//   useA11yRouteChange();
+//   useDocumentTitle(title);
 
-  function routeWithTitle(routeProps: RouteComponentProps) {
-    return <Component {...rest} {...routeProps} />;
-  }
+//   function routeWithTitle(routeProps: RouteProps) {
+//     return <Component {...rest} {...routeProps} />;
+//   }
 
-  return <Route render={routeWithTitle} {...rest} />;
-};
+//   return (
+//       <Route element={routeWithTitle} {...rest} />
+
+//   );
+// };
 
 const PageNotFound = ({ title }: { title: string }) => {
   useDocumentTitle(title);
-  return <Route component={NotFound} />;
+  return <Route element={NotFound} />;
 };
 
 const flattenedRoutes: IAppRoute[] = routes.reduce(
-  (flattened, route) => [...flattened, ...(route.routes ? route.routes : [route])],
+  (flattened, route) => [
+    ...flattened,
+    ...(route.routes ? route.routes : [route]),
+  ],
   [] as IAppRoute[]
 );
 
 const AppRoutes = (): React.ReactElement => (
-  <Switch>
-    {flattenedRoutes.map(({ path, exact, component, title }, idx) => (
-      <RouteWithTitleUpdates path={path} exact={exact} component={component} key={idx} title={title} />
-    ))}
-    <PageNotFound title="404 Page Not Found" />
-  </Switch>
+  <Routes>
+    {/* {flattenedRoutes.map(({ path, exact, component, title }, idx) => (
+      // <RouteWithTitleUpdates
+      //   path={path}
+      //   // exact={exact}
+      //   component={component}
+      //   key={idx}
+      //   title={title}
+      // />
+      <Route path={path} element={component} key={idx} />
+    ))} */}
+    {/* <PageNotFound title="404 Page Not Found" /> */}
+    <Route path="*" element={<NotFound />} />
+
+    <Route path="/" element={<ConnectorPage />} />
+    <Route path="/plugins" element={<ConnectorPlugins />} />
+    <Route path="/config-connector/:connectorPlugin" element={<CreateConnectorWizard />} />
+  </Routes>
 );
 
 export { AppRoutes, routes };

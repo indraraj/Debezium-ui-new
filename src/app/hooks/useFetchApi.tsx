@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react';
 
-type FetchApiResult<T> = {
+export type FetchApiResult<T> = {
     data: T | null;
     isLoading: boolean;
     error: Error | null;

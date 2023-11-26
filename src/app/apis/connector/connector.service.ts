@@ -110,6 +110,41 @@ export class ConnectorService extends BaseService {
     return this.httpPost<any>(endpoint, {});
   }
 
+  public getConnectorPlugins(baseHref: string): Promise<any> {
+    this.logger?.info(
+      "[ConnectorService] Getting the list of Connector plugins:",
+    );
+    const endpoint: string = this.endpoint(
+      "debezium/connector-plugins",
+      baseHref,
+      undefined,
+    );
+    return this.httpGet<any>(endpoint);
+  }
+
+  public getConnectorSchema(baseHref: string, connectorId: string): Promise<any> {
+    this.logger?.info(
+      "[ConnectorService] Getting the OpenAPI schema for the specific connector type id:",
+    );
+    const endpoint: string = this.endpoint(
+      "debezium/:connectorId/schema ",
+      baseHref,
+      {  connectorId }
+    );
+    return this.httpGet<any>(endpoint);
+  }
+
+
+  public createConnector(baseHref: string, connectorPayload: ConnectorConfig): Promise<ConnectorConfigResponse> {
+    this.logger?.info(`[ConnectorService] Creating a connector name ${connectorPayload.name}`);
+
+    const endpoint: string = this.endpoint(
+      "connectors/",
+      baseHref,
+      ""
+    );
+    return this.httpPostWithReturn(endpoint, connectorPayload);
+  }
   
 
   /**
@@ -221,20 +256,20 @@ export class ConnectorService extends BaseService {
    *  .then((result: CreateConnectorResult) => {
    *  });
    */
-  public createConnector(
-    clusterId: number,
-    connectorTypeId: string,
-    body: any
-  ): Promise<void> {
-    this.logger?.info("[ConnectorService] Creating a connector:");
+  // public createConnector(
+  //   clusterId: number,
+  //   connectorTypeId: string,
+  //   body: any
+  // ): Promise<void> {
+  //   this.logger?.info("[ConnectorService] Creating a connector:");
 
-    const endpoint: string = this.endpoint(
-      "/connector/:clusterId/:connectorTypeId",
-      "",
-      { clusterId, connectorTypeId }
-    );
-    return this.httpPostWithReturn(endpoint, body);
-  }
+  //   const endpoint: string = this.endpoint(
+  //     "/connector/:clusterId/:connectorTypeId",
+  //     "",
+  //     { clusterId, connectorTypeId }
+  //   );
+  //   return this.httpPostWithReturn(endpoint, body);
+  // }
 
   /**
    * Create Connector using the supplied ConnectorConfiguration

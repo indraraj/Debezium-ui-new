@@ -26,6 +26,8 @@ import { CubesIcon, FilterIcon, SortAmountDownIcon } from '@patternfly/react-ico
 import ConnectorTable from './ConnectorTable';
 import { isEmpty, isNull } from 'lodash';
 import useFetchApi from '@app/hooks/useFetchApi';
+import { useNavigate } from 'react-router-dom';
+import { POLLING_INTERVAL } from '@app/constants';
 
 const ConnectorPage: React.FunctionComponent = () => {
   // const [loading, setLoading] = React.useState<boolean>(false);
@@ -41,7 +43,7 @@ const ConnectorPage: React.FunctionComponent = () => {
     clusterUrl,
     connectorService.getConnectorsStatus,
     connectorService,
-    5000,
+    POLLING_INTERVAL.TenSeconds,
   );
   const {
     data: connectorsStatus,
@@ -53,7 +55,7 @@ const ConnectorPage: React.FunctionComponent = () => {
     clusterUrl,
     connectorService.getConnectorsInfo,
     connectorService,
-    5000,
+    POLLING_INTERVAL.TenSeconds,
   );
   const { data: connectorsInfo, isLoading: connectorsInfoLoading, error: connectorsInfoError } = getConnectorsInfo;
 
@@ -85,6 +87,9 @@ const ConnectorPage: React.FunctionComponent = () => {
   //   }
   // }, [connectorsStatus, connectorsInfo]);
 
+  const navigate = useNavigate();
+  const createConnectorPage = () => navigate('/plugins');
+
   const tableToolbar = (
     <Toolbar usePageInsets id="compact-toolbar">
       <ToolbarContent>
@@ -102,7 +107,7 @@ const ConnectorPage: React.FunctionComponent = () => {
             </OverflowMenuItem>
             <OverflowMenuGroup groupType="button" isPersistent>
               <OverflowMenuItem>
-                <Button variant="primary">Create Connector</Button>
+                <Button variant="primary" onClick={createConnectorPage}>Create Connector</Button>
               </OverflowMenuItem>
             </OverflowMenuGroup>
           </OverflowMenu>
