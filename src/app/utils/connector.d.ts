@@ -84,6 +84,12 @@ enum ConnectorType {
   "sink",
 }
 
+interface ConnectorNameStatus {
+  name: string;
+  connector: Connector;
+  tasks: ConnectorTask[];
+}
+
 
 interface SchemaComponent {
   schemas: Record<string, ConnectorSchema>;

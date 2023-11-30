@@ -16,7 +16,7 @@ import {
   WizardStep,
   useWizardContext,
 } from "@patternfly/react-core";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { AppLayoutContext } from "@app/AppLayout";
 import { Services } from "@app/apis/services";
 import useFetchDynamicApi from "@app/hooks/useFetchDynamicApi";
@@ -31,11 +31,12 @@ import { useCallback, useEffect } from "react";
 import { ReviewStep } from "./ReviewStep";
 import { getConnectorClass, isEmpty } from "@app/utils";
 import usePostWithReturnApi from "@app/hooks/usePostWithReturnApi";
+import { CustomPropertiesStep } from "./CustomPropertiesStep";
+import { ConnectorTypeLogo } from "@app/components";
 
 export const CreateConnectorWizard: React.FunctionComponent = () => {
   let { connectorPlugin } = useParams();
-
-  const [isAdvanceChecked, setIsAdvanceChecked] = React.useState<boolean>(true);
+  let locationData = useLocation().state;
 
   const [isCancelModalOpen, setIsCancelModalOpen] = React.useState(false);
 
@@ -62,6 +63,10 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
     Record<string, any>
   >({});
 
+  const [customPropFormData, setCustomPropFormData] = React.useState<
+    Record<string, any>
+  >({ "": "" });
+
   const updateFormData = useCallback(
     (key: string, value: any, formStep: FormStep) => {
       switch (formStep) {
@@ -74,7 +79,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
           );
           break;
         case FormStep.FILTER:
-          setFilterFormData(cloneDeep({ ...filter, [key]: value }));
+          setFilterFormData(cloneDeep({ ...filterFormData, [key]: value }));
           break;
         case FormStep.DATA_OPTION:
           setDataOptionFormData(
@@ -84,26 +89,25 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
         case FormStep.RUNTIME_OPTION:
           setRuntimeFormData(cloneDeep({ ...runtimeFormData, [key]: value }));
           break;
+        case FormStep.CUSTOM_PROPERTIES:
+          setCustomPropFormData(
+            cloneDeep({ ...customPropFormData, [key]: value })
+          );
+          break;
       }
     },
-    [connectionFormData, filterFormData, dataOptionFormData, runtimeFormData]
+    [
+      connectionFormData,
+      filterFormData,
+      dataOptionFormData,
+      runtimeFormData,
+      customPropFormData,
+    ]
   );
-  // console.log("connectorName", connectorName);
-  // console.log("connectionFormData", connectionFormData);
-  // console.log("filterFormData", filterFormData);
-  // console.log("dataOptionFormData", dataOptionFormData);
-  // console.log("runtimeFormData", runtimeFormData);
 
   const navigate = useNavigate();
 
   const cancelConnectorWizard = () => navigate("/");
-
-  const handleAdvanceChange = (
-    _event: React.FormEvent<HTMLInputElement>,
-    checked: boolean
-  ) => {
-    setIsAdvanceChecked(checked);
-  };
 
   const appLayoutContext = React.useContext(AppLayoutContext);
   const { cluster: clusterUrl, addNewNotification } = appLayoutContext;
@@ -200,19 +204,63 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
     "x-category": "FILTERS",
   });
 
+  const filterDatabasePost = usePostWithReturnApi<any>();
+
+  const {
+    response: filterResponse,
+    isLoading: filterLoading,
+    error: filterError,
+    postWithReturn: filterPostWithReturn,
+  } = filterDatabasePost;
+
+  const filterDatabase = useCallback(async () => {
+    await filterPostWithReturn(
+      clusterUrl,
+      connectorService.validateFilter,
+      connectorService,
+      // filterFormData,
+      {
+        name: connectorName.name,
+        config: {
+          "connector.class": getConnectorClass(connectorPlugin),
+          ...connectionFormData,
+          ...filterFormData,
+        },
+      },
+      "mysql"
+    );
+  }, [filterFormData, connectionFormData, connectorName]);
+
+  const deleteFilterExplicitProperty = useCallback(
+    (
+      removeFilterProperty: string,
+      addFilterProperty: string,
+      value: string
+    ) => {
+      const newFilterFormData = cloneDeep({ ...filterFormData });
+      delete newFilterFormData[removeFilterProperty];
+      newFilterFormData[addFilterProperty] = value;
+      setFilterFormData(newFilterFormData);
+    },
+    [filterFormData]
+  );
+
   const PageTemplateTitle = (
     <PageSection variant="light">
       <Split>
         <SplitItem>
           <TextContent>
-            <Text component="h1">Create {connectorPlugin} connectors</Text>
+            <Text component="h1">
+              {/* <ConnectorTypeLogo type={`.${connectorPlugin}`} size={"30px"} /> &nbsp;  */}
+              Create {connectorPlugin} connectors
+            </Text>
             <Text component="p">
-              Configure {connectorPlugin} connector by following the steps
-              below.
+              Configure {connectorPlugin}
+              connector by following the steps below.
             </Text>
           </TextContent>
         </SplitItem>
-        <SplitItem isFilled></SplitItem>
+        {/* <SplitItem isFilled></SplitItem>
         <SplitItem>
           <Switch
             label="Skip additional properties"
@@ -222,7 +270,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
             id="Advance-config-switch"
             name="Toggle Hide and Show Advanced Configuration steps"
           />
-        </SplitItem>
+        </SplitItem> */}
       </Split>
     </PageSection>
   );
@@ -233,26 +281,45 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
     response: createConnectorResponse,
     isLoading: createConnectorLoading,
     error: createConnectorError,
-    postWithReturn: createConnectorPostWithReturn
+    postWithReturn: createConnectorPostWithReturn,
   } = createConnectorPost;
 
   const ReviewStepFooter = () => {
     const { goToNextStep, goToPrevStep, close } = useWizardContext();
-    const [isLoading, setIsLoading] = React.useState(false);
+    const [isCreateConnectorLoading, setIsCreateConnectorLoading] =
+      React.useState(false);
 
     async function onNext() {
-      console.log("clusterUrl", clusterUrl);
-      setIsLoading(true);
-      await createConnectorPostWithReturn(
-        clusterUrl,
-    connectorService.createConnector,
-    connectorService,
-    {name: connectorName.name, config: {"connector.class": getConnectorClass(connectorPlugin), ...connectionFormData, ...dataOptionFormData, ...runtimeFormData}}
-      )
-      setIsLoading(false);
-      console.log("createConnectorResponse", createConnectorResponse,createConnectorLoading,createConnectorError);
+      setIsCreateConnectorLoading(true);
 
-      goToNextStep();
+      connectorService
+        .createConnector(clusterUrl, {
+          name: connectorName.name,
+          config: {
+            "connector.class": getConnectorClass(connectorPlugin),
+            ...connectionFormData,
+            ...filterFormData,
+            ...dataOptionFormData,
+            ...runtimeFormData,
+            ...customPropFormData,
+          },
+        })
+        .then((cConnectorResponse: any) => {
+          addNewNotification(
+            "success",
+            "Create connector successful",
+            `Connector ${connectorName.name} created successfully`
+          );
+          navigate("/");
+        })
+        .catch((err) => {
+          addNewNotification("danger", "Create connector failed", err.message);
+        })
+        .finally(() => {
+          setIsCreateConnectorLoading(false);
+        });
+
+      // goToNextStep();
     }
 
     return (
@@ -260,19 +327,23 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
         <Button
           variant="secondary"
           onClick={goToPrevStep}
-          isDisabled={isLoading}
+          isDisabled={isCreateConnectorLoading}
         >
           Back
         </Button>
         <Button
           variant="primary"
           onClick={onNext}
-          isLoading={isLoading}
-          isDisabled={isLoading}
+          isLoading={isCreateConnectorLoading}
+          isDisabled={isCreateConnectorLoading}
         >
-          Finish
+          Submit
         </Button>
-        <Button variant="link" onClick={close} isDisabled={isLoading}>
+        <Button
+          variant="link"
+          onClick={close}
+          isDisabled={isCreateConnectorLoading}
+        >
           Cancel
         </Button>
       </WizardFooterWrapper>
@@ -339,24 +410,28 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
             name="Additional properties"
             id="wizard-step-2"
             isExpandable
-            isHidden={!isAdvanceChecked}
+            isHidden={locationData.hideAdvance || false}
             steps={[
               <WizardStep
                 name="Filter definition"
                 id="wizard-step-2a"
                 key="wizard-step-2a"
-                isHidden={!isAdvanceChecked}
+                isHidden={locationData.hideAdvance || false}
               >
                 <FilterStep
                   filterProperties={...filterProperties}
                   requiredList={generateRequiredList()}
+                  formData={filterFormData}
+                  updateFormData={updateFormData}
+                  filterDatabase={filterDatabase}
+                  deleteFilterExplicitProperty={deleteFilterExplicitProperty}
                 />
               </WizardStep>,
               <WizardStep
                 name="Transformation"
                 id="wizard-step-2b"
                 key="wizard-step-2b"
-                isHidden={!isAdvanceChecked}
+                isHidden={locationData.hideAdvance || false}
               >
                 <p>Transformation step </p>
               </WizardStep>,
@@ -364,7 +439,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
                 name="Topic creation"
                 id="wizard-step-2c"
                 key="wizard-step-2c"
-                isHidden={!isAdvanceChecked}
+                isHidden={locationData.hideAdvance || false}
               >
                 <p>Topic creation step</p>
               </WizardStep>,
@@ -372,7 +447,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
                 name="Data options"
                 id="wizard-step-2d"
                 key="wizard-step-2d"
-                isHidden={!isAdvanceChecked}
+                isHidden={locationData.hideAdvance || false}
               >
                 <DataOptionStep
                   dataOptionProperties={...dataOptionProperties}
@@ -387,7 +462,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
                 name="Runtime options"
                 id="wizard-step-2e"
                 key="wizard-step-2e"
-                isHidden={!isAdvanceChecked}
+                isHidden={locationData.hideAdvance || false}
               >
                 <RuntimeOptionStep
                   runtimeOptionEngineProperties={...runtimeOptionsEngineProperties}
@@ -401,9 +476,17 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
                 name="Custom properties"
                 id="wizard-step-2f"
                 key="wizard-step-2f"
-                isHidden={!isAdvanceChecked}
+                isHidden={locationData.hideAdvance || false}
               >
-                <p>Custom properties step</p>
+                <CustomPropertiesStep
+                  formData={customPropFormData}
+                  updateFormData={updateFormData}
+                  connectorProperties={{
+                    ...connectionFormData,
+                    ...dataOptionFormData,
+                    ...runtimeFormData,
+                  }}
+                />
               </WizardStep>,
             ]}
           />
@@ -427,9 +510,11 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
               connectorType={connectorPlugin}
               connectorProperties={{
                 ...connectionFormData,
+                ...filterFormData,
                 ...dataOptionFormData,
                 ...runtimeFormData,
               }}
+              customProperties={{ ...customPropFormData }}
             />
           </WizardStep>
         </Wizard>

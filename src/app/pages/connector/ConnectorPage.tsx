@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as React from 'react';
+import * as React from "react";
 import {
   Button,
   Card,
@@ -19,15 +19,19 @@ import {
   Toolbar,
   ToolbarContent,
   ToolbarItem,
-} from '@patternfly/react-core';
-import { Services } from '@app/apis/services';
-import { AppLayoutContext } from '@app/AppLayout';
-import { CubesIcon, FilterIcon, SortAmountDownIcon } from '@patternfly/react-icons';
-import ConnectorTable from './ConnectorTable';
-import { isEmpty, isNull } from 'lodash';
-import useFetchApi from '@app/hooks/useFetchApi';
-import { useNavigate } from 'react-router-dom';
-import { POLLING_INTERVAL } from '@app/constants';
+} from "@patternfly/react-core";
+import { Services } from "@app/apis/services";
+import { AppLayoutContext } from "@app/AppLayout";
+import {
+  CubesIcon,
+  FilterIcon,
+  SortAmountDownIcon,
+} from "@patternfly/react-icons";
+import ConnectorTable from "./ConnectorTable";
+import { isEmpty, isNull } from "lodash";
+import useFetchApi from "@app/hooks/useFetchApi";
+import { useNavigate } from "react-router-dom";
+import { POLLING_INTERVAL } from "@app/constants";
 
 const ConnectorPage: React.FunctionComponent = () => {
   // const [loading, setLoading] = React.useState<boolean>(false);
@@ -37,13 +41,11 @@ const ConnectorPage: React.FunctionComponent = () => {
   const { cluster: clusterUrl, addNewNotification } = appLayoutContext;
   const connectorService = Services.getConnectorService();
 
-  
-
   const getConnectorsStatus = useFetchApi<Record<string, ConnectorStatus>>(
     clusterUrl,
     connectorService.getConnectorsStatus,
     connectorService,
-    POLLING_INTERVAL.TenSeconds,
+    POLLING_INTERVAL.FiveSeconds
   );
   const {
     data: connectorsStatus,
@@ -55,11 +57,13 @@ const ConnectorPage: React.FunctionComponent = () => {
     clusterUrl,
     connectorService.getConnectorsInfo,
     connectorService,
-    POLLING_INTERVAL.TenSeconds,
+    POLLING_INTERVAL.FiveSeconds
   );
-  const { data: connectorsInfo, isLoading: connectorsInfoLoading, error: connectorsInfoError } = getConnectorsInfo;
-
-  console.log(connectorsStatusError, connectorsInfoError, connectorsInfoLoading, connectorsStatusLoading);
+  const {
+    data: connectorsInfo,
+    isLoading: connectorsInfoLoading,
+    error: connectorsInfoError,
+  } = getConnectorsInfo;
 
   // useEffect(() => {
   //   if (connectorsStatusLoading || connectorsInfoLoading) {
@@ -88,7 +92,7 @@ const ConnectorPage: React.FunctionComponent = () => {
   // }, [connectorsStatus, connectorsInfo]);
 
   const navigate = useNavigate();
-  const createConnectorPage = () => navigate('/plugins');
+  const createConnectorPage = () => navigate("/plugins");
 
   const tableToolbar = (
     <Toolbar usePageInsets id="compact-toolbar">
@@ -107,7 +111,9 @@ const ConnectorPage: React.FunctionComponent = () => {
             </OverflowMenuItem>
             <OverflowMenuGroup groupType="button" isPersistent>
               <OverflowMenuItem>
-                <Button variant="primary" onClick={createConnectorPage}>Create Connector</Button>
+                <Button variant="primary" onClick={createConnectorPage}>
+                  Create Connector
+                </Button>
               </OverflowMenuItem>
             </OverflowMenuGroup>
           </OverflowMenu>
@@ -122,8 +128,9 @@ const ConnectorPage: React.FunctionComponent = () => {
       <TextContent>
         <Text component="h1">Connectors</Text>
         <Text component="p">
-          This list show all the connectors that have been created on the cluster, you can create a new connector by
-          clicking on the &quot;Create connector&quot; button.
+          This list show all the connectors that have been created on the
+          cluster, you can create a new connector by clicking on the
+          &quot;Create connector&quot; button.
         </Text>
       </TextContent>
     </PageSection>
@@ -131,7 +138,8 @@ const ConnectorPage: React.FunctionComponent = () => {
 
   return (
     <>
-      {(connectorsInfoLoading || connectorsStatusLoading) && (isNull(connectorsInfo) || isNull(connectorsStatus)) ? (
+      {(connectorsInfoLoading || connectorsStatusLoading) &&
+      (isNull(connectorsInfo) || isNull(connectorsStatus)) ? (
         <p>Loading...</p>
       ) : isEmpty(connectorsInfo) || isEmpty(connectorsStatus) ? (
         <>
@@ -144,7 +152,8 @@ const ConnectorPage: React.FunctionComponent = () => {
             <EmptyStateBody>
               <TextContent>
                 <Text component="p">
-                  You can create a new connector by clicking on the &quot;Create connector&quot; button.
+                  You can create a new connector by clicking on the &quot;Create
+                  connector&quot; button.
                 </Text>
                 {/* <Text component={TextVariants.small}>
                 This text has overridden a css component variable to demonstrate how to apply customizations using

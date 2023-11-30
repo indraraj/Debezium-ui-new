@@ -4,3 +4,6 @@ export * from './ConnectorStatusComponent';
 export * from './ConnectorTask';
 export * from './AppBreadcrumb';
 export * from './FormInputComponent';
+export * from './FilterExplicitFields';
+export * from './KeyValueInputGroup';
+export * from './DeleteConnectorModel';

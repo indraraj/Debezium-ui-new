@@ -134,6 +134,30 @@ export class ConnectorService extends BaseService {
     return this.httpGet<any>(endpoint);
   }
 
+  public getConnectorConfig(baseHref: string, connectorName: string): Promise<any> {
+    this.logger?.info(
+      "[ConnectorService] Getting the connector configuration for:"+ connectorName,
+    );
+    const endpoint: string = this.endpoint(
+      "connectors/:connectorName/config ",
+      baseHref,
+      {  connectorName }
+    );
+    return this.httpGet<any>(endpoint);
+  }
+
+  public getConnectorStatus(baseHref: string, connectorName: string): Promise<any> {
+    this.logger?.info(
+      "[ConnectorService] Getting the current connector status for:"+ connectorName,
+    );
+    const endpoint: string = this.endpoint(
+      "connectors/:connectorName/status ",
+      baseHref,
+      {  connectorName }
+    );
+    return this.httpGet<any>(endpoint);
+  }
+
 
   public createConnector(baseHref: string, connectorPayload: ConnectorConfig): Promise<ConnectorConfigResponse> {
     this.logger?.info(`[ConnectorService] Creating a connector name ${connectorPayload.name}`);
@@ -144,6 +168,17 @@ export class ConnectorService extends BaseService {
       ""
     );
     return this.httpPostWithReturn(endpoint, connectorPayload);
+  }
+
+  public validateFilter(baseHref: string, filterPayload: ConnectorConfig, connectorId: string,): Promise<any> {
+    this.logger?.info(`[ConnectorService] Validate the filter properties and get the applied filter response from database`);
+
+    const endpoint: string = this.endpoint(
+      "debezium/:connectorId/validate/filters",
+      baseHref,
+      {  connectorId }
+    );
+    return this.httpPostWithReturn(endpoint, filterPayload);
   }
   
 
@@ -332,19 +367,19 @@ export class ConnectorService extends BaseService {
   /**
    * Get the Connector config
    */
-  public getConnectorConfig(
-    clusterId: number,
-    connectorName: string
-  ): Promise<any> {
-    this.logger?.info("[ConnectorService] Fetch the connector");
+  // public getConnectorConfig(
+  //   clusterId: number,
+  //   connectorName: string
+  // ): Promise<any> {
+  //   this.logger?.info("[ConnectorService] Fetch the connector");
 
-    const endpoint: string = this.endpoint(
-      "/connectors/:clusterId/:connectorName/config",
-      "",
-      { clusterId, connectorName }
-    );
-    return this.httpGet<any>(endpoint);
-  }
+  //   const endpoint: string = this.endpoint(
+  //     "/connectors/:clusterId/:connectorName/config",
+  //     "",
+  //     { clusterId, connectorName }
+  //   );
+  //   return this.httpGet<any>(endpoint);
+  // }
 
   /**
    * Delete the Connector for the supplied clusterId

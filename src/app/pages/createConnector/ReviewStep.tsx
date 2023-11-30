@@ -29,6 +29,7 @@ interface ReviewStepProps {
   connectorName: Record<string, any>;
   connectorType: string | undefined;
   connectorProperties: Record<string, any>;
+  customProperties: Record<string, any>;
 }
 
 export const ReviewStep: React.FC<ReviewStepProps> = ({
@@ -36,6 +37,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   connectorName,
   connectorType,
   connectorProperties,
+  customProperties,
 }) => {
   // Add your component logic here
   const [showJson, setShowJson] = React.useState<boolean>(false);
@@ -68,7 +70,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
     downloadJson!.removeChild(link);
   };
 
-  const connectorJsonPayload = JSON.stringify({name: connectorName.name,config:{"connector.class": getConnectorClass(connectorType), ...connectorProperties}}, null, 2);
+  const connectorJsonPayload = JSON.stringify({name: connectorName.name,config:{"connector.class": getConnectorClass(connectorType), ...connectorProperties, ...customProperties}}, null, 2);
 
   const actions = (
     <React.Fragment>

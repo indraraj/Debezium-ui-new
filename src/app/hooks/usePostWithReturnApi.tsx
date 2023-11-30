@@ -5,7 +5,7 @@ export type PostWithReturnApiResult<T> = {
     response: T | null;
     isLoading: boolean;
     error: Error | null;
-    postWithReturn: (url: string | null, api: any, serviceRef: any, data: ConnectorConfig) => Promise<void>;
+    postWithReturn: (url: string | null, api: any, serviceRef: any, postData: any, dynamicParam?: string) => Promise<void>;
 };
 
 function usePostWithReturnApi<T>(): PostWithReturnApiResult<T> {
@@ -13,11 +13,11 @@ function usePostWithReturnApi<T>(): PostWithReturnApiResult<T> {
     const [error, setError] = useState<Error | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const postWithReturn = async (url: string | null, api: any, serviceRef: any,data: ConnectorConfig) => {
+    const postWithReturn = async (url: string | null, api: any, serviceRef: any,postData: any, dynamicParam?: string) => {
         setIsLoading(true);
         try {
             const apiCall = api.bind(serviceRef);
-                const response = await apiCall(url, data);
+                const response = await apiCall(url, postData, dynamicParam?dynamicParam:null);
             setResponse(response);
         } catch (error) {
             setError(error as Error);

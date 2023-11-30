@@ -5,13 +5,16 @@ function useFetchDynamicApi<T>(
   url: string | null,
   api: any,
   serviceRef: any,
-  dynamicData: any
+  dynamicData: any,
+  pollingInterval?: number
 ): FetchApiResult<T> {
   const [data, setData] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    let ignore = false;
+
     const fetchData = async () => {
       try {
         const apiCall = api.bind(serviceRef);
@@ -30,7 +33,25 @@ function useFetchDynamicApi<T>(
     if (url) {
       fetchData();
     }
-  }, [url]);
+
+    if (pollingInterval) {
+      const intervalId = setInterval(() => {
+          if (!ignore) {
+              fetchData();
+          }
+      }, pollingInterval);
+
+      return () => {
+          clearInterval(intervalId);
+          ignore = true;
+      };
+  }
+
+  return () => {
+      ignore = true;
+  };
+
+  }, [api, serviceRef, url, pollingInterval]);
 
   return { data, isLoading, error };
 }

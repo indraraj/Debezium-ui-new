@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import * as React from 'react';
+import * as React from "react";
 import {
   Alert,
   AlertActionCloseButton,
@@ -32,12 +32,13 @@ import {
   TextContent,
   ToolbarItem,
   getUniqueId,
-} from '@patternfly/react-core';
+} from "@patternfly/react-core";
 
-import AppHeader from './AppHeader';
-import { AppLayoutContext } from './AppLayoutContext';
-import { EllipsisVIcon, SearchIcon } from '@patternfly/react-icons';
-import { AppBreadcrumb } from '@app/components';
+import AppHeader from "./AppHeader";
+import { AppLayoutContext } from "./AppLayoutContext";
+import { EllipsisVIcon, SearchIcon } from "@patternfly/react-icons";
+import { AppBreadcrumb } from "@app/components";
+import { useLocation } from "react-router-dom";
 
 interface IAppLayout {
   children: React.ReactNode;
@@ -46,7 +47,7 @@ interface IAppLayout {
 export interface NotificationProps {
   title: string;
   srTitle: string;
-  variant: 'success' | 'danger' | 'warning' | 'info' | 'custom' | undefined;
+  variant: "success" | "danger" | "warning" | "info" | "custom" | undefined;
   key: React.Key;
   timestamp: string;
   description: string;
@@ -54,7 +55,7 @@ export interface NotificationProps {
 }
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
-  const [cluster, setCluster] = React.useState<string>('');
+  const [cluster, setCluster] = React.useState<string>("");
   // const [sidebarOpen, setSidebarOpen] = React.useState(true);
 
   const maxDisplayed = 3;
@@ -66,27 +67,45 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     const dateCreated = new Date();
     return (
       dateCreated.toDateString() +
-      ' at ' +
-      ('00' + dateCreated.getHours().toString()).slice(-2) +
-      ':' +
-      ('00' + dateCreated.getMinutes().toString()).slice(-2)
+      " at " +
+      ("00" + dateCreated.getHours().toString()).slice(-2) +
+      ":" +
+      ("00" + dateCreated.getMinutes().toString()).slice(-2)
     );
   };
 
+  const location = useLocation();
+
   const removeAlert = (key: React.Key) => {
-    setAlerts((prevAlerts) => prevAlerts.filter((alert) => alert.props.id !== key.toString()));
+    setAlerts((prevAlerts) =>
+      prevAlerts.filter((alert) => alert.props.id !== key.toString())
+    );
   };
 
-  const addNewNotification = (variant: NotificationProps['variant'], heading?: string, msg?: string) => {
-    const variantFormatted = variant!.charAt(0).toUpperCase() + variant!.slice(1);
-    const title = heading || variantFormatted + ' alert notification';
-    const srTitle = variantFormatted + ' alert';
-    const description = msg || variantFormatted + ' alert notification description';
+  const addNewNotification = (
+    variant: NotificationProps["variant"],
+    heading?: string,
+    msg?: string
+  ) => {
+    const variantFormatted =
+      variant!.charAt(0).toUpperCase() + variant!.slice(1);
+    const title = heading || variantFormatted + " alert notification";
+    const srTitle = variantFormatted + " alert";
+    const description =
+      msg || variantFormatted + " alert notification description";
     const key = getUniqueId();
     const timestamp = getTimeCreated();
 
     setNotifications((prevNotifications) => [
-      { title, srTitle, variant, key, timestamp, description, isNotificationRead: false },
+      {
+        title,
+        srTitle,
+        variant,
+        key,
+        timestamp,
+        description,
+        isNotificationRead: false,
+      },
       ...prevNotifications,
     ]);
 
@@ -99,7 +118,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           onTimeout={() => removeAlert(key)}
           isLiveRegion
           actionClose={
-            <AlertActionCloseButton title={title} variantLabel={`${variant} alert`} onClose={() => removeAlert(key)} />
+            <AlertActionCloseButton
+              title={title}
+              variantLabel={`${variant} alert`}
+              onClose={() => removeAlert(key)}
+            />
           }
           key={key}
           id={key.toString()}
@@ -111,12 +134,17 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     }
   };
 
-  const [alerts, setAlerts] = React.useState<React.ReactElement<AlertProps>[]>([]);
+  const [alerts, setAlerts] = React.useState<React.ReactElement<AlertProps>[]>(
+    []
+  );
   const [isDrawerExpanded, setDrawerExpanded] = React.useState(false);
-  const [openDropdownKey, setOpenDropdownKey] = React.useState<React.Key | null>(null);
+  const [openDropdownKey, setOpenDropdownKey] =
+    React.useState<React.Key | null>(null);
 
-  const [overflowMessage, setOverflowMessage] = React.useState<string>('');
-  const [notifications, setNotifications] = React.useState<NotificationProps[]>([]);
+  const [overflowMessage, setOverflowMessage] = React.useState<string>("");
+  const [notifications, setNotifications] = React.useState<NotificationProps[]>(
+    []
+  );
 
   const handleClusterChange = (url: string) => {
     setCluster(url);
@@ -136,7 +164,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   };
 
   const isNotificationRead = (key: React.Key) =>
-    notifications.find((notification) => notification.key === key)?.isNotificationRead;
+    notifications.find((notification) => notification.key === key)
+      ?.isNotificationRead;
 
   React.useEffect(() => {
     setOverflowMessage(buildOverflowMessage());
@@ -147,7 +176,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     if (overflow > 0 && maxDisplayed > 0) {
       return `View ${overflow} more notification(s) in notification drawer`;
     }
-    return '';
+    return "";
   };
 
   const onDropdownToggle = (id: React.Key) => {
@@ -164,20 +193,29 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   const markAllNotificationsRead = () => {
     setNotifications((prevNotifications) =>
-      prevNotifications.map((notification) => ({ ...notification, isNotificationRead: true })),
+      prevNotifications.map((notification) => ({
+        ...notification,
+        isNotificationRead: true,
+      }))
     );
   };
 
   const getUnreadNotificationsNumber = () =>
-    notifications.filter((notification) => notification.isNotificationRead === false).length;
+    notifications.filter(
+      (notification) => notification.isNotificationRead === false
+    ).length;
 
   const containsUnreadAlertNotification = () =>
     notifications.filter(
-      (notification) => notification.isNotificationRead === false && notification.variant === 'danger',
+      (notification) =>
+        notification.isNotificationRead === false &&
+        notification.variant === "danger"
     ).length > 0;
 
   const removeNotification = (key: React.Key) => {
-    setNotifications((prevNotifications) => prevNotifications.filter((notification) => notification.key !== key));
+    setNotifications((prevNotifications) =>
+      prevNotifications.filter((notification) => notification.key !== key)
+    );
   };
 
   const getNotificationBadgeVariant = () => {
@@ -219,13 +257,18 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const markNotificationRead = (key: React.Key) => {
     setNotifications((prevNotifications) =>
       prevNotifications.map((notification) =>
-        notification.key === key ? { ...notification, isNotificationRead: true } : notification,
-      ),
+        notification.key === key
+          ? { ...notification, isNotificationRead: true }
+          : notification
+      )
     );
   };
 
   const notificationDrawerDropdownItems = (key: React.Key) => [
-    <DropdownItem key={`markRead-${key}`} onClick={() => markNotificationRead(key)}>
+    <DropdownItem
+      key={`markRead-${key}`}
+      onClick={() => markNotificationRead(key)}
+    >
       Mark as read
     </DropdownItem>,
     <DropdownItem key={`clear-${key}`} onClick={() => removeNotification(key)}>
@@ -235,19 +278,24 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   const notificationDrawer = (
     <NotificationDrawer>
-      <NotificationDrawerHeader count={getUnreadNotificationsNumber()} onClose={(_event) => setDrawerExpanded(false)}>
+      <NotificationDrawerHeader
+        count={getUnreadNotificationsNumber()}
+        onClose={(_event) => setDrawerExpanded(false)}
+      >
         <Dropdown
           id="notification-drawer-0"
-          isOpen={openDropdownKey === 'dropdown-toggle-id-0'}
+          isOpen={openDropdownKey === "dropdown-toggle-id-0"}
           onSelect={onDropdownSelect}
-          popperProps={{ position: 'right' }}
-          onOpenChange={(isOpen: boolean) => !isOpen && setOpenDropdownKey(null)}
+          popperProps={{ position: "right" }}
+          onOpenChange={(isOpen: boolean) =>
+            !isOpen && setOpenDropdownKey(null)
+          }
           toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
             <MenuToggle
               ref={toggleRef}
-              isExpanded={openDropdownKey === 'dropdown-toggle-id-0'}
+              isExpanded={openDropdownKey === "dropdown-toggle-id-0"}
               variant="plain"
-              onClick={() => onDropdownToggle('dropdown-toggle-id-0')}
+              onClick={() => onDropdownToggle("dropdown-toggle-id-0")}
               aria-label="Notification drawer actions"
             >
               <EllipsisVIcon aria-hidden="true" />
@@ -260,38 +308,54 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       <NotificationDrawerBody>
         {notifications.length !== 0 && (
           <NotificationDrawerList>
-            {notifications.map(({ key, variant, title, srTitle, description, timestamp }, index) => (
-              <NotificationDrawerListItem
-                key={key}
-                variant={variant}
-                isRead={isNotificationRead(key)}
-                onClick={() => markNotificationRead(key)}
-              >
-                <NotificationDrawerListItemHeader variant={variant} title={title} srTitle={srTitle}>
-                  <Dropdown
-                    id={key.toString()}
-                    isOpen={openDropdownKey === key}
-                    onSelect={onDropdownSelect}
-                    popperProps={{ position: 'right' }}
-                    onOpenChange={(isOpen: boolean) => !isOpen && setOpenDropdownKey(null)}
-                    toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                      <MenuToggle
-                        ref={toggleRef}
-                        isExpanded={openDropdownKey === key}
-                        variant="plain"
-                        onClick={() => onDropdownToggle(key)}
-                        aria-label={`Notification ${index + 1} actions`}
-                      >
-                        <EllipsisVIcon aria-hidden="true" />
-                      </MenuToggle>
-                    )}
+            {notifications.map(
+              (
+                { key, variant, title, srTitle, description, timestamp },
+                index
+              ) => (
+                <NotificationDrawerListItem
+                  key={key}
+                  variant={variant}
+                  isRead={isNotificationRead(key)}
+                  onClick={() => markNotificationRead(key)}
+                >
+                  <NotificationDrawerListItemHeader
+                    variant={variant}
+                    title={title}
+                    srTitle={srTitle}
                   >
-                    <DropdownList>{notificationDrawerDropdownItems(key)}</DropdownList>
-                  </Dropdown>
-                </NotificationDrawerListItemHeader>
-                <NotificationDrawerListItemBody timestamp={timestamp}> {description} </NotificationDrawerListItemBody>
-              </NotificationDrawerListItem>
-            ))}
+                    <Dropdown
+                      id={key.toString()}
+                      isOpen={openDropdownKey === key}
+                      onSelect={onDropdownSelect}
+                      popperProps={{ position: "right" }}
+                      onOpenChange={(isOpen: boolean) =>
+                        !isOpen && setOpenDropdownKey(null)
+                      }
+                      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                        <MenuToggle
+                          ref={toggleRef}
+                          isExpanded={openDropdownKey === key}
+                          variant="plain"
+                          onClick={() => onDropdownToggle(key)}
+                          aria-label={`Notification ${index + 1} actions`}
+                        >
+                          <EllipsisVIcon aria-hidden="true" />
+                        </MenuToggle>
+                      )}
+                    >
+                      <DropdownList>
+                        {notificationDrawerDropdownItems(key)}
+                      </DropdownList>
+                    </Dropdown>
+                  </NotificationDrawerListItemHeader>
+                  <NotificationDrawerListItemBody timestamp={timestamp}>
+                    {" "}
+                    {description}{" "}
+                  </NotificationDrawerListItemBody>
+                </NotificationDrawerListItem>
+              )
+            )}
           </NotificationDrawerList>
         )}
         {notifications.length === 0 && (
@@ -301,7 +365,9 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               titleText="No notifications found"
               icon={<EmptyStateIcon icon={SearchIcon} />}
             />
-            <EmptyStateBody>There are currently no notifications.</EmptyStateBody>
+            <EmptyStateBody>
+              There are currently no notifications.
+            </EmptyStateBody>
           </EmptyState>
         )}
       </NotificationDrawerBody>
@@ -349,7 +415,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   //   </PageSidebar>
   // );
 
-  const pageId = 'primary-app-container';
+  const pageId = "primary-app-container";
 
   // const PageTemplateTitle = (
   //   <PageSection variant="light">
@@ -385,7 +451,13 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           />
         }
         // sidebar={sidebarOpen && Sidebar}
-        breadcrumb={<AppBreadcrumb />}
+        breadcrumb={
+          location.pathname === "/" ? (
+            <></>
+          ) : (
+            <AppBreadcrumb path={location.pathname} />
+          )
+        }
         skipToContent={PageSkipToContent}
         notificationDrawer={notificationDrawer}
         isNotificationDrawerExpanded={isDrawerExpanded}
@@ -394,7 +466,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         {children}
       </Page>
       <PageSection variant={PageSectionVariants.light}>
-        <AlertGroup isToast isLiveRegion onOverflowClick={onAlertGroupOverflowClick} overflowMessage={overflowMessage}>
+        <AlertGroup
+          isToast
+          isLiveRegion
+          onOverflowClick={onAlertGroupOverflowClick}
+          overflowMessage={overflowMessage}
+        >
           {alerts.slice(0, maxDisplayed)}
         </AlertGroup>
       </PageSection>

@@ -1,98 +1,97 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react';
-import { ActionsColumn, IAction, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { ConnectorStatusComponent, ConnectorTask, ConnectorTypeLogo } from '@app/components';
-import { AppLayoutContext, NotificationProps } from '@app/AppLayout';
-import { Services } from '@app/apis/services';
+import React from "react";
 import {
-  Button,
-  Form,
-  FormGroup,
-  FormHelperText,
-  HelperText,
-  HelperTextItem,
-  Modal,
-  ModalVariant,
-  TextInput,
-} from '@patternfly/react-core';
+  ActionsColumn,
+  IAction,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+} from "@patternfly/react-table";
+import {
+  ConnectorStatusComponent,
+  ConnectorTask,
+  ConnectorTypeLogo,
+  DeleteConnectorModel,
+} from "@app/components";
+import { AppLayoutContext, NotificationProps } from "@app/AppLayout";
+import { Services } from "@app/apis/services";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   connectorsStatus: Record<string, ConnectorStatus>;
   connectorsInfo: Record<string, ConnectorInfo>;
-  addNewNotification: (variant: NotificationProps['variant'], heading?: string, msg?: string) => void;
+  addNewNotification: (
+    variant: NotificationProps["variant"],
+    heading?: string,
+    msg?: string
+  ) => void;
 }
-type validate = 'success' | 'warning' | 'error' | 'default';
+type validate = "success" | "warning" | "error" | "default";
 
-const ConnectorTable: React.FC<Props> = ({ connectorsStatus, connectorsInfo, addNewNotification }) => {
+const ConnectorTable: React.FC<Props> = ({
+  connectorsStatus,
+  connectorsInfo,
+  addNewNotification,
+}) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
-  const [deleteConnectorName, setDeleteConnectorName] = React.useState<string>('');
-  const [validated, setValidated] = React.useState<validate>('default');
-  const [deleteConnectorNameConfirmation, setDeleteConnectorNameConfirmation] = React.useState('');
+  const [deleteConnectorName, setDeleteConnectorName] =
+    React.useState<string>("");
 
-  const handleNameChange = (_event: any, name: string) => {
-    setDeleteConnectorNameConfirmation(name);
-    if (name === deleteConnectorName && name !== '') {
-      setValidated('success');
-    } else {
-      setValidated('error');
-    }
+  const navigate = useNavigate();
+
+  const updateDeleteModalOpen = (isOpen: boolean) => {
+    setIsDeleteModalOpen(isOpen);
   };
 
   const appLayoutContext = React.useContext(AppLayoutContext);
   const clusterUrl = appLayoutContext.cluster;
   const connectorService = Services.getConnectorService();
 
-  const clearDeleteOperation = () => {
-    setDeleteConnectorNameConfirmation('');
-    setDeleteConnectorName('');
-    setIsDeleteModalOpen(false);
-    setValidated('default')
-  };
-
-  const deleteConnector = () => {
-    if (deleteConnectorName === deleteConnectorNameConfirmation && deleteConnectorName !== '') {
-      connectorService
-        .deleteConnector(clusterUrl, deleteConnectorName)
-        .then((cConnectors: any) => {
-          addNewNotification('success', 'Connector deleted', `Connector "${deleteConnectorName}" deleted successfully.`);
-          clearDeleteOperation();
-        })
-        .catch((err) => {
-          console.log('error', err);
-        });
-    }
-  };
-
   const deleteConnectorModal = (connectorName: string) => {
     setIsDeleteModalOpen(true);
     setDeleteConnectorName(connectorName);
   };
 
+  const goToConnectorDetail = (connectorName: string) => {
+    navigate(`/connector/${connectorName}`);
+  };
+
   const defaultActions = (connectorName: string): IAction[] => [
     {
-      title: 'Pause',
+      title: "Pause",
       onClick: () => {
         connectorService
           .pauseConnector(clusterUrl, connectorName)
           .then((cConnectors: any) => {
-            addNewNotification('info', 'Connector paused', `Connector "${connectorName}" paused successfully.`);
+            addNewNotification(
+              "info",
+              "Connector paused",
+              `Connector "${connectorName}" paused successfully.`
+            );
           })
           .catch((err) => {
-            console.log('error', err);
+            console.log("error", err);
           });
       },
     },
     {
-      title: 'Resume',
+      title: "Resume",
       onClick: () => {
         connectorService
           .resumeConnector(clusterUrl, connectorName)
           .then((cConnectors: any) => {
-            addNewNotification('success', 'Connector resumed', `Connector "${connectorName}" resumed successfully.`);
+            addNewNotification(
+              "success",
+              "Connector resumed",
+              `Connector "${connectorName}" resumed successfully.`
+            );
           })
           .catch((err) => {
-            console.log('error', err);
+            console.log("error", err);
           });
       },
     },
@@ -100,15 +99,19 @@ const ConnectorTable: React.FC<Props> = ({ connectorsStatus, connectorsInfo, add
       isSeparator: true,
     },
     {
-      title: 'Restart connector',
+      title: "Restart connector",
       onClick: () => {
         connectorService
           .restartConnector(clusterUrl, connectorName)
           .then((cConnectors: any) => {
-            addNewNotification('success', 'Connector restarted', `Connector "${connectorName}" restarted successfully.`);
+            addNewNotification(
+              "success",
+              "Connector restarted",
+              `Connector "${connectorName}" restarted successfully.`
+            );
           })
           .catch((err) => {
-            console.log('error', err);
+            console.log("error", err);
           });
       },
     },
@@ -119,7 +122,7 @@ const ConnectorTable: React.FC<Props> = ({ connectorsStatus, connectorsInfo, add
       isSeparator: true,
     },
     {
-      title: 'Delete connector',
+      title: "Delete connector",
       onClick: () => deleteConnectorModal(connectorName),
     },
   ];
@@ -157,13 +160,33 @@ const ConnectorTable: React.FC<Props> = ({ connectorsStatus, connectorsInfo, add
             return (
               <Tr key={connectorName}>
                 <Td dataLabel="connector-image">
-                  <ConnectorTypeLogo type={connectorsInfo[connectorName].info.config['connector.class']} />
+                  <ConnectorTypeLogo
+                    type={
+                      connectorsInfo[connectorName].info.config[
+                        "connector.class"
+                      ]
+                    }
+                  />
                 </Td>
-                <Td dataLabel="name">{connectorName}</Td>
+                <Td dataLabel="name">
+                  <a onClick={() => goToConnectorDetail(connectorName)}>
+                    {connectorName}
+                  </a>
+                </Td>
                 <Td dataLabel="status">
-                  <ConnectorStatusComponent status={connectorsStatus[connectorName].status.connector.state} />
+                  <ConnectorStatusComponent
+                    status={
+                      connectorsStatus[connectorName].status.connector.state
+                    }
+                  />
                 </Td>
-                <Td dataLabel="task"><ConnectorTask connectorTasks={connectorsStatus[connectorName].status.tasks!}/></Td>
+                <Td dataLabel="task">
+                  <ConnectorTask
+                    connectorTasks={
+                      connectorsStatus[connectorName].status.tasks!
+                    }
+                  />
+                </Td>
                 <Td></Td>
 
                 <Td isActionCell>
@@ -180,46 +203,11 @@ const ConnectorTable: React.FC<Props> = ({ connectorsStatus, connectorsInfo, add
           })}
         </Tbody>
       </Table>
-      <Modal
-        variant={ModalVariant.medium}
-        title={`Delete "${deleteConnectorName}" connector?`}
-        titleIconVariant="warning"
-        isOpen={isDeleteModalOpen}
-        onClose={clearDeleteOperation}
-        actions={[
-          <Button
-            key="confirm"
-            variant="primary"
-            isDisabled={deleteConnectorName !== deleteConnectorNameConfirmation}
-            onClick={deleteConnector}
-          >
-            Confirm
-          </Button>,
-          <Button key="cancel" variant="link" onClick={clearDeleteOperation}>
-            Cancel
-          </Button>,
-        ]}
-      >
-        <Form>
-          <FormGroup label="Connector name" fieldId="delete-connector-name">
-            <TextInput
-              isRequired
-              validated={validated}
-              type="text"
-              id="delete-connector-name-text"
-              name="delete-connector-name-text"
-              aria-describedby="Delete connector name"
-              value={deleteConnectorNameConfirmation}
-              onChange={handleNameChange}
-            />
-            <FormHelperText>
-              <HelperText>
-                <HelperTextItem>Confirm the connector name you want to delete.</HelperTextItem>
-              </HelperText>
-            </FormHelperText>
-          </FormGroup>
-        </Form>
-      </Modal>
+      <DeleteConnectorModel
+        deleteConnectorName={deleteConnectorName}
+        isDeleteModalOpen={isDeleteModalOpen}
+        updateDeleteModalOpen={updateDeleteModalOpen}
+      />
     </>
   );
 };
