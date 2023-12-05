@@ -1,5 +1,7 @@
 import * as React from "react";
 import {
+  Alert,
+  BackToTop,
   Button,
   Modal,
   ModalVariant,
@@ -11,6 +13,7 @@ import {
   Switch,
   Text,
   TextContent,
+  ToolbarItem,
   Wizard,
   WizardFooterWrapper,
   WizardStep,
@@ -20,14 +23,14 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { AppLayoutContext } from "@app/AppLayout";
 import { Services } from "@app/apis/services";
 import useFetchDynamicApi from "@app/hooks/useFetchDynamicApi";
-import { cloneDeep, filter } from "lodash";
+import { cloneDeep, filter, isUndefined } from "lodash";
 import { ConnectionStep } from "./ConnectionStep";
 import "./CreateConnectorWizard.css";
 import { FilterStep } from "./FilterStep";
 import { DataOptionStep } from "./DataOptionStep";
 import { RuntimeOptionStep } from "./RuntimeOptionStep";
 import { FormStep, PropertyCategory } from "@app/constants";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ReviewStep } from "./ReviewStep";
 import { getConnectorClass, isEmpty } from "@app/utils";
 import usePostWithReturnApi from "@app/hooks/usePostWithReturnApi";
@@ -66,6 +69,15 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
   const [customPropFormData, setCustomPropFormData] = React.useState<
     Record<string, any>
   >({ "": "" });
+
+  const [connectionValidationStatus, setConnectionValidationStatus] = useState<
+    boolean | undefined
+  >(undefined);
+
+  const [connectionValidationMessage, setConnectionValidationMessage] =
+    useState<string>("");
+
+  const ref = useRef<HTMLInputElement>(null);
 
   const updateFormData = useCallback(
     (key: string, value: any, formStep: FormStep) => {
@@ -206,6 +218,8 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
 
   const filterDatabasePost = usePostWithReturnApi<any>();
 
+  const validateConnectionPost = usePostWithReturnApi<any>();
+
   const {
     response: filterResponse,
     isLoading: filterLoading,
@@ -213,23 +227,48 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
     postWithReturn: filterPostWithReturn,
   } = filterDatabasePost;
 
+  const {
+    response: validateResponse,
+    isLoading: validateLoading,
+    error: validateError,
+    postWithReturn: validateConnectionPostWithReturn,
+  } = validateConnectionPost;
+
   const filterDatabase = useCallback(async () => {
     await filterPostWithReturn(
       clusterUrl,
-      connectorService.validateFilter,
+      connectorService.validateFilters,
       connectorService,
       // filterFormData,
+
       {
-        name: connectorName.name,
-        config: {
-          "connector.class": getConnectorClass(connectorPlugin),
-          ...connectionFormData,
-          ...filterFormData,
-        },
+        "connector.class": getConnectorClass(connectorPlugin),
+        ...connectionFormData,
+        ...filterFormData,
       },
       "mysql"
     );
   }, [filterFormData, connectionFormData, connectorName]);
+
+  const validateConnection = useCallback(async () => {
+    await validateConnectionPostWithReturn(
+      clusterUrl,
+      connectorService.validateConnection,
+      connectorService,
+      // filterFormData,
+
+      {
+        "connector.class": getConnectorClass(connectorPlugin),
+        ...connectionFormData,
+      },
+      "mysql"
+    );
+  }, [filterFormData, connectionFormData, connectorName]);
+
+  const clearFilterFormData = useCallback(() => {
+    console.log("clearFilterFormData");
+    setFilterFormData({});
+  }, []);
 
   const deleteFilterExplicitProperty = useCallback(
     (
@@ -275,6 +314,13 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
     </PageSection>
   );
 
+  const scrollToTop = () => {
+    console.log("scroll to top");
+    if (ref.current) {
+      ref.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const createConnectorPost = usePostWithReturnApi<ConnectorConfigResponse>();
 
   const {
@@ -284,10 +330,83 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
     postWithReturn: createConnectorPostWithReturn,
   } = createConnectorPost;
 
+  const ConnectionStepFooter = () => {
+    const { goToNextStep, goToPrevStep, close } = useWizardContext();
+
+    const [isLoading, setIsLoading] = useState(false);
+
+    async function onValidate() {
+      setIsLoading(true);
+
+      connectorService
+        .validateConnection(
+          clusterUrl,
+          {
+            "connector.class": getConnectorClass(connectorPlugin),
+            ...connectionFormData,
+          },
+          "mysql"
+        )
+        .then((validationResponse: any) => {
+          scrollToTop();
+          if (validationResponse.status === "INVALID") {
+            setConnectionValidationStatus(false);
+            if (validationResponse.validationResults) {
+              const invalidProp: string[] = [];
+              validationResponse.validationResults.forEach(
+                (element: { property: string | number }) => {
+                  invalidProp.push(
+                    allConnectorProperties[element.property].title
+                  );
+                }
+              );
+              setConnectionValidationMessage(invalidProp.join(", "));
+            }
+          }else{
+            setConnectionValidationStatus(true);
+            // setConnectionValidationMessage(" validation valid");
+          }
+        })
+        .catch((err) => {
+          addNewNotification("danger", "Something went wrong.", err.message);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+
+    return (
+      <WizardFooterWrapper>
+        <Button variant="secondary" onClick={goToPrevStep} isDisabled={true}>
+          Back
+        </Button>
+        <Button
+          variant="primary"
+          onClick={goToNextStep}
+          isDisabled={!connectionFilled || isLoading}
+        >
+          Next
+        </Button>
+        <ToolbarItem variant="separator" />
+        <Button
+          variant="secondary"
+          onClick={onValidate}
+          isLoading={isLoading}
+          isDisabled={!connectionFilled || isLoading}
+        >
+          Validate
+        </Button>
+        <Button variant="link" onClick={close} isDisabled={isLoading}>
+          Cancel
+        </Button>
+      </WizardFooterWrapper>
+    );
+  };
+
   const ReviewStepFooter = () => {
     const { goToNextStep, goToPrevStep, close } = useWizardContext();
     const [isCreateConnectorLoading, setIsCreateConnectorLoading] =
-      React.useState(false);
+      useState(false);
 
     async function onNext() {
       setIsCreateConnectorLoading(true);
@@ -362,7 +481,8 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
           <WizardStep
             name="Connection"
             id="wizard-step-1"
-            footer={{ isNextDisabled: !connectionFilled }}
+            // footer={{ isNextDisabled: !connectionFilled }}
+            footer={<ConnectionStepFooter />}
           >
             {connectorsSchemaLoading ? (
               <React.Fragment>
@@ -394,7 +514,24 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
                 <Skeleton />
               </React.Fragment>
             ) : (
-              <>
+              <div ref={ref}>
+                {isUndefined(connectionValidationStatus) ? (
+                  <></>
+                ) : connectionValidationStatus ? (
+                  <Alert
+                    variant="success"
+                    isInline
+                    title="Validation successful"
+                  />
+                ) : (
+                  <Alert
+                    variant="danger"
+                    isInline
+                    title="Validation unsuccessful"
+                  >
+                    <p>{connectionValidationMessage} value(s) is invalid.</p>{" "}
+                  </Alert>
+                )}
                 <ConnectionStep
                   connectorName={connectorName}
                   connectionBasicProperties={...[...basicProperties]}
@@ -403,7 +540,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
                   updateFormData={updateFormData}
                   requiredList={generateRequiredList()}
                 />
-              </>
+              </div>
             )}
           </WizardStep>
           <WizardStep
@@ -424,6 +561,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
                   formData={filterFormData}
                   updateFormData={updateFormData}
                   filterDatabase={filterDatabase}
+                  clearFilterFormData={clearFilterFormData}
                   deleteFilterExplicitProperty={deleteFilterExplicitProperty}
                 />
               </WizardStep>,
@@ -483,6 +621,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
                   updateFormData={updateFormData}
                   connectorProperties={{
                     ...connectionFormData,
+                    ...filterFormData,
                     ...dataOptionFormData,
                     ...runtimeFormData,
                   }}
@@ -518,6 +657,11 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
             />
           </WizardStep>
         </Wizard>
+        {/* <BackToTop
+          isAlwaysVisible
+          onClick={scrollToTop}
+          style={{ zIndex: 9999 }}
+        /> */}
         <Modal
           variant={ModalVariant.small}
           title={`Delete connector?`}

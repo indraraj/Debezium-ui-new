@@ -21,6 +21,7 @@ import {
 import React from "react";
 import "./ConnectorPlugins.css";
 import { useNavigate } from "react-router-dom";
+import { DatabaseIcon } from "@patternfly/react-icons";
 
 interface ConnectorPluginsProps {
   // Add any props you need for the component
@@ -122,7 +123,8 @@ export const ConnectorPlugins: React.FC<ConnectorPluginsProps> = (props) => {
                     name: `${plugins.id}`,
                   }}
                 >
-                  <ConnectorTypeLogo type={plugins.className} size={"140px"} />
+                  {plugins.className.includes("oracle") ? <DatabaseIcon className="placeholder-database-icon" /> : <ConnectorTypeLogo type={plugins.className} size={"140px"} />} 
+                  
                 </CardHeader>
                 <CardTitle>{plugins.displayName}</CardTitle>
 

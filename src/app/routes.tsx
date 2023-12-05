@@ -7,8 +7,9 @@ import { Route, RouteProps, Routes, useLocation } from "react-router-dom";
 import { NotFound } from '@app/NotFound/NotFound';
 import { useDocumentTitle } from "@app/utils/useDocumentTitle";
 import { ConnectorPage } from "./pages/connector";
-import { ConnectorPlugins, CreateConnectorWizard } from "./pages/createConnector";
+import { CreateConnectorWizard } from "./pages/createConnector";
 import { ConnectorDetails } from "./pages/connectorDetails";
+import { ConnectorPlugins } from "./pages/connectorPlugins/ConnectorPlugins";
 
 let routeFocusTimer: number;
 export interface IAppRoute {

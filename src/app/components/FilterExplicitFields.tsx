@@ -50,9 +50,13 @@ export const FilterExplicitFields: React.FC<FilterExplicitFieldsProps> = ({
     } else {
       setIsSelected(`${property}.exclude.list`);
     }
-  }, []);
+  }, [hasBoth]);
 
   useEffect(() => {
+
+    console.log("formData","clearFilterFormData", formData[`${property}.include.list`] ||
+      formData[`${property}.exclude.list`]);
+
     if (
       formData[`${property}.include.list`] ||
       formData[`${property}.exclude.list`]
@@ -64,12 +68,16 @@ export const FilterExplicitFields: React.FC<FilterExplicitFieldsProps> = ({
           setIsSelected(`${property}.exclude.list`);
         }
       }
+      
       setValue(
         formData[`${property}.include.list`] ||
           formData[`${property}.exclude.list`]
       );
+    }else{
+      setValue("");
+      setIsSelected(`${property}.include.list`);
     }
-  }, []);
+  }, [formData,hasBoth]);
 
   const handleItemClick = (
     event:
@@ -93,17 +101,17 @@ export const FilterExplicitFields: React.FC<FilterExplicitFieldsProps> = ({
     _event: React.FormEvent<HTMLInputElement>,
     value: string
   ) => {
-    setValue(value);
+    // setValue(value);
     updateFormData(isSelected, value, FormStep.FILTER);
   };
 
   return (
     <FormGroup
-      label={hasBoth ? capitalize(`${property} filter`) : capitalize(`${property} exclude filter`)}
+      label={hasBoth ? capitalize(`${property} ${value ==="" ? "include/exclude": isSelected.includes("include") ? "include" :"exclude"} filter`) : capitalize(`${property} exclude filter`)}
       labelIcon={
         <Popover
           aria-label="Popover with auto-width"
-          bodyContent={<div>{`List of ${property} to include`}</div>}
+          bodyContent={<div>{`List of ${property} to be ${value === "" ? "include/exclude": isSelected.includes("include") ? "include" :"exclude"}d.`}</div>}
         >
           <button
             type="button"

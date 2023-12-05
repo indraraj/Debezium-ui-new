@@ -139,6 +139,9 @@ module.exports = (env) => {
       new CopyPlugin({
         patterns: [{ from: './src/favicon.png', to: 'images' }],
       }),
+      new CopyPlugin({
+        patterns: [{ from: './config.js', to: './' }],
+      }),
     ],
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.jsx'],

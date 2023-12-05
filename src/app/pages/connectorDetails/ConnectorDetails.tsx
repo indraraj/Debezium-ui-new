@@ -1,6 +1,7 @@
 import { AppLayoutContext } from "@app/AppLayout";
 import { Services } from "@app/apis/services";
 import {
+    Button,
   Card,
   CardBody,
   CardTitle,
@@ -14,21 +15,26 @@ import {
   DropdownList,
   Flex,
   FlexItem,
+  Grid,
+  GridItem,
+  HelperText,
+  HelperTextItem,
   MenuToggle,
   MenuToggleElement,
   PageSection,
   PageSectionVariants,
   Split,
   SplitItem,
+  Stack,
   Tab,
   TabContent,
   TabContentBody,
   TabTitleText,
   Tabs,
   Title,
+  Tooltip,
 } from "@patternfly/react-core";
 import React, { useCallback } from "react";
-import "../createConnector/ConnectorPlugins.css";
 import { useNavigate, useParams } from "react-router-dom";
 import useFetchDynamicApi from "@app/hooks/useFetchDynamicApi";
 import {
@@ -37,6 +43,8 @@ import {
   DeleteConnectorModel,
 } from "@app/components";
 import { POLLING_INTERVAL } from "@app/constants";
+import { TimesCircleIcon } from "@patternfly/react-icons";
+import "./ConnectorDetails.css";
 
 interface ConnectorDetailsProps {
   // Add any props you need for the component
@@ -165,7 +173,11 @@ export const ConnectorDetails: React.FC<ConnectorDetailsProps> = (props) => {
           >
             <FlexItem>
               <ConnectorTypeLogo
-                type={connectorConfiguration? connectorConfiguration["connector.class"] : ""}
+                type={
+                  connectorConfiguration
+                    ? connectorConfiguration["connector.class"]
+                    : ""
+                }
               />
             </FlexItem>
             <FlexItem>
@@ -270,32 +282,96 @@ export const ConnectorDetails: React.FC<ConnectorDetailsProps> = (props) => {
           hidden={0 !== activeTabKey}
         >
           <TabContentBody>
-            <Card>
-              <CardTitle>
-                <Title headingLevel="h4" size="xl">
-                  Connector configuration
-                </Title>
-              </CardTitle>
-              <CardBody>
-                <DescriptionList>
-                  {connectorConfiguration &&
-                    Object.keys(connectorConfiguration).map(
-                      (property: string) => {
-                        return (
-                          <DescriptionListGroup key={property}>
-                            <DescriptionListTerm>
-                              {property}
-                            </DescriptionListTerm>
-                            <DescriptionListDescription>
-                              {connectorConfiguration[property]}
-                            </DescriptionListDescription>
-                          </DescriptionListGroup>
-                        );
-                      }
-                    )}
-                </DescriptionList>
-              </CardBody>
-            </Card>
+            <Grid hasGutter>
+              <GridItem span={6}>
+                <Card>
+                  <CardTitle>
+                    <Title headingLevel="h4" size="xl">
+                      Connector configuration
+                    </Title>
+                  </CardTitle>
+                  <CardBody>
+                    <DescriptionList
+                      isCompact
+                      isAutoFit
+                      autoFitMinModifier={{ default: "200px" }}
+                    >
+                      {connectorConfiguration &&
+                        Object.keys(connectorConfiguration).map(
+                          (property: string) => {
+                            return (
+                              <DescriptionListGroup key={property}>
+                                <DescriptionListTerm>
+                                  {property}
+                                </DescriptionListTerm>
+                                <DescriptionListDescription>
+                                  {connectorConfiguration[property]}
+                                </DescriptionListDescription>
+                              </DescriptionListGroup>
+                            );
+                          }
+                        )}
+                    </DescriptionList>
+                  </CardBody>
+                </Card>
+              </GridItem>
+
+              <GridItem span={6}>
+                <Card>
+                  <CardTitle>
+                    <Title headingLevel="h4" size="xl">
+                      Connector tasks
+                    </Title>
+                  </CardTitle>
+                  <CardBody>
+                    {connectorStatus?.tasks.map((task) => {
+                      return (
+                        <Card
+                          style={{ textAlign: "center", width: "250px" }}
+                          key={`${task.worker_id}`}
+                          component="div"
+                        >
+                          <CardTitle
+                            style={{ textAlign: "center" }}
+                          >{`Id: ${task.id}`}</CardTitle>
+                          <CardBody>
+                            <Stack>
+                              <Tooltip
+                                content={
+                                  <div>
+                                    {task.trace}
+                                  </div>
+                                }
+                              >
+                                <Button variant="plain">
+                                <HelperText className="connector-details_task-status-text">
+                                  <HelperTextItem variant="error" hasIcon>
+                                    {task.state}
+                                  </HelperTextItem>
+                                </HelperText>
+                                </Button>
+                              </Tooltip>
+
+                              <span>Worker Id: &nbsp;{task.worker_id}</span>
+                            </Stack>
+                          </CardBody>
+                        </Card>
+                      );
+                    })}
+                  </CardBody>
+                </Card>
+              </GridItem>
+              <GridItem span={3} rowSpan={2}>
+                <Card>
+                  <CardTitle>
+                    <Title headingLevel="h4" size="xl">
+                      Essential connector metrics
+                    </Title>
+                  </CardTitle>
+                  <CardBody>Coming soon</CardBody>
+                </Card>
+              </GridItem>
+            </Grid>
           </TabContentBody>
         </TabContent>
         <TabContent

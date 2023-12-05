@@ -170,7 +170,7 @@ export class ConnectorService extends BaseService {
     return this.httpPostWithReturn(endpoint, connectorPayload);
   }
 
-  public validateFilter(baseHref: string, filterPayload: ConnectorConfig, connectorId: string,): Promise<any> {
+  public validateFilters(baseHref: string, filterPayload: ConnectorConfig, connectorId: string,): Promise<any> {
     this.logger?.info(`[ConnectorService] Validate the filter properties and get the applied filter response from database`);
 
     const endpoint: string = this.endpoint(
@@ -178,7 +178,18 @@ export class ConnectorService extends BaseService {
       baseHref,
       {  connectorId }
     );
-    return this.httpPostWithReturn(endpoint, filterPayload);
+    return this.httpPutWithReturn(endpoint, filterPayload);
+  }
+
+  public validateConnection(baseHref: string, connectionPayload: Record<string,string>, connectorId: string,): Promise<any> {
+    this.logger?.info(`[ConnectorService] Validate the filter properties and get the applied filter response from database`);
+
+    const endpoint: string = this.endpoint(
+      "debezium/:connectorId/validate/connection",
+      baseHref,
+      {  connectorId }
+    );
+    return this.httpPutWithReturn(endpoint, connectionPayload);
   }
   
 
@@ -197,22 +208,22 @@ export class ConnectorService extends BaseService {
    *    }
    *  });
    */
-  public validateConnection(
-    connectorTypeId: string,
-    body: any
-  ): Promise<any> {
-    this.logger?.info(
-      "[ConnectorService] Validating connection:",
-      connectorTypeId
-    );
+  // public validateConnection(
+  //   connectorTypeId: string,
+  //   body: any
+  // ): Promise<any> {
+  //   this.logger?.info(
+  //     "[ConnectorService] Validating connection:",
+  //     connectorTypeId
+  //   );
 
-    const endpoint: string = this.endpoint(
-      "/connector-types/:connectorTypeId/validation/connection",
-      "",
-      { connectorTypeId }
-    );
-    return this.httpPostWithReturn(endpoint, body);
-  }
+  //   const endpoint: string = this.endpoint(
+  //     "/connector-types/:connectorTypeId/validation/connection",
+  //     "",
+  //     { connectorTypeId }
+  //   );
+  //   return this.httpPostWithReturn(endpoint, body);
+  // }
 
   /**
    * Validate the filters for the supplied connection type
@@ -229,22 +240,22 @@ export class ConnectorService extends BaseService {
    *    }
    *  });
    */
-  public validateFilters(
-    connectorTypeId: string,
-    body: any
-  ): Promise<any> {
-    this.logger?.info(
-      "[ConnectorService] Validating filters:",
-      connectorTypeId
-    );
+  // public validateFilters(
+  //   connectorTypeId: string,
+  //   body: any
+  // ): Promise<any> {
+  //   this.logger?.info(
+  //     "[ConnectorService] Validating filters:",
+  //     connectorTypeId
+  //   );
 
-    const endpoint: string = this.endpoint(
-      "/connector-types/:connectorTypeId/validation/filters",
-      "",
-      { connectorTypeId }
-    );
-    return this.httpPostWithReturn(endpoint, body);
-  }
+  //   const endpoint: string = this.endpoint(
+  //     "/connector-types/:connectorTypeId/validation/filters",
+  //     "",
+  //     { connectorTypeId }
+  //   );
+  //   return this.httpPostWithReturn(endpoint, body);
+  // }
 
   /**
    * Validate the properties for the supplied connection type

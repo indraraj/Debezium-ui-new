@@ -162,7 +162,7 @@ const ConnectorPage: React.FunctionComponent = () => {
               </TextContent>
             </EmptyStateBody>
             <EmptyStateFooter>
-              <Button variant="primary">Create connector</Button>
+              <Button variant="primary" onClick={createConnectorPage}>Create connector</Button>
             </EmptyStateFooter>
           </EmptyState>
         </>

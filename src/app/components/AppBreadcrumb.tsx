@@ -20,12 +20,12 @@ export const AppBreadcrumb: React.FunctionComponent<AppBreadcrumbProps> = ({
         </BreadcrumbItem>
       )}
       {path.includes("config-connector/") && (
-        <BreadcrumbItem to="/create-connector" isActive>
+        <BreadcrumbItem isActive>
           Connector configuration Wizard
         </BreadcrumbItem>
       )}
       {path.includes("/connector/") && (
-        <BreadcrumbItem to="/selected connector" isActive>
+        <BreadcrumbItem isActive>
           Selected connector
         </BreadcrumbItem>
       )}

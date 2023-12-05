@@ -17,6 +17,7 @@ interface FilterStepProps {
   formData: Record<string, any>;
   updateFormData: (key: string, value: any, formStep: FormStep) => void;
   filterDatabase: () => Promise<void>;
+  clearFilterFormData: () => void;
   deleteFilterExplicitProperty: (removeFilterProperty: string, addFilterProperty: string, value: string) => void;
 }
 
@@ -26,6 +27,7 @@ export const FilterStep: React.FC<FilterStepProps> = ({
   updateFormData,
   formData,
   filterDatabase,
+  clearFilterFormData,
   deleteFilterExplicitProperty,
 }) => {
   const explicitFields: ConnectorProperties[] = [];
@@ -95,7 +97,7 @@ export const FilterStep: React.FC<FilterStepProps> = ({
             </Button>
           </ToolbarItem>
           <ToolbarItem>
-            <Button variant="tertiary">Clear filters</Button>
+            <Button variant="tertiary" onClick={clearFilterFormData}>Clear filters</Button>
           </ToolbarItem>
       
         </ToolbarContent>

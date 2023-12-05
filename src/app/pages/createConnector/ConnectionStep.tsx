@@ -1,4 +1,3 @@
-
 import { FormInputComponent, validate } from "@app/components";
 import { FormStep } from "@app/constants";
 import {
@@ -15,7 +14,7 @@ import {
 } from "@patternfly/react-core";
 import { ExclamationCircleIcon, TrashIcon } from "@patternfly/react-icons";
 import { cloneDeep, isNil } from "lodash";
-import React, { FormEvent, useCallback } from "react";
+import React, { FormEvent, useCallback, useRef } from "react";
 
 interface ConnectionStepProps {
   connectionBasicProperties: ConnectorProperties[];
@@ -34,6 +33,7 @@ export const ConnectionStep: React.FC<ConnectionStepProps> = ({
   updateFormData,
   requiredList,
 }) => {
+  // const ref = useRef<HTMLInputElement>(null);
 
   const [validated, setValidated] = React.useState<validate>("default");
 
@@ -41,19 +41,28 @@ export const ConnectionStep: React.FC<ConnectionStepProps> = ({
     _event: FormEvent<HTMLInputElement>,
     value: string
   ) => {
-
-    if (
-      value === ""
-    ) {
+    if (value === "") {
       setValidated("error");
     } else {
       setValidated("default");
     }
     updateFormData("name", value, FormStep.CONNECTOR_NAME);
   };
+
+  //   const scrollToTop = () => {
+  //     console.log("scroll to top");
+  //     if(ref.current){
+  //       ref.current.scrollIntoView({behavior: 'smooth'});
+  //     }
+
+  // };
+
   return (
     <>
-      <Form isWidthLimited>
+      <Form
+        isWidthLimited
+        // ref={ref}
+      >
         <FormGroup label="Connector name" isRequired fieldId="connector-name">
           <TextInput
             isRequired
@@ -67,11 +76,13 @@ export const ConnectionStep: React.FC<ConnectionStepProps> = ({
           />
           <FormHelperText>
             <HelperText>
-              <HelperTextItem 
-              icon={ validated === "error" ?<ExclamationCircleIcon /> : <></>}
-              variant={validated}
+              <HelperTextItem
+                icon={validated === "error" ? <ExclamationCircleIcon /> : <></>}
+                variant={validated}
               >
-                {validated === "error" ? "Connector name is required." : "Enter a connector name that is unique from other existing connectors."}
+                {validated === "error"
+                  ? "Connector name is required."
+                  : "Enter a connector name that is unique from other existing connectors."}
               </HelperTextItem>
             </HelperText>
           </FormHelperText>
@@ -145,6 +156,7 @@ export const ConnectionStep: React.FC<ConnectionStepProps> = ({
             </FormFieldGroupExpandable>
           )}
       </Form>
+      {/* <BackToTop isAlwaysVisible onClick={scrollToTop} style={{zIndex: 9999}}/> */}
     </>
   );
 };

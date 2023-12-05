@@ -87,7 +87,7 @@ enum ConnectorType {
 interface ConnectorNameStatus {
   name: string;
   connector: Connector;
-  tasks: ConnectorTask[];
+  tasks: StatusTasks[];
 }
 
 
