@@ -30,6 +30,12 @@ interface StatusTasks {
   trace: string;
 }
 
+interface DataCollection {
+  name: string;
+  namespace: string;
+  identifier: string;
+}
+
 interface ConnectorStatus {
   status: Status;
 }

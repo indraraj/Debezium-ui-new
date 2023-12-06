@@ -249,6 +249,8 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
     postWithReturn: validateConnectionPostWithReturn,
   } = validateConnectionPost;
 
+  
+
   const filterDatabase = useCallback(async () => {
     await filterPostWithReturn(
       clusterUrl,
@@ -263,6 +265,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
       },
       connectorPlugin
     );
+
   }, [filterFormData, connectionFormData, connectorName]);
 
   const validateConnection = useCallback(async () => {
@@ -579,6 +582,8 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
                   requiredList={generateRequiredList()}
                   formData={filterFormData}
                   updateFormData={updateFormData}
+                  connectionFormData={connectionFormData}
+                  connectorPlugin={connectorPlugin || ""}
                   filterDatabase={filterDatabase}
                   clearFilterFormData={clearFilterFormData}
                   deleteFilterExplicitProperty={deleteFilterExplicitProperty}

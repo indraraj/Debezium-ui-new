@@ -249,7 +249,7 @@ export const CustomPropertiesStep: React.FC<CustomPropertiesStepProps> = ({
                 // isLoading={validationInProgress}
                 onClick={saveCustomProperties}
               >
-                Apply
+                Save changes
               </Button>
               <Button
                 variant="link"

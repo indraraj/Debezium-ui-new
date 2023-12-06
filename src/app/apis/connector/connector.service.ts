@@ -170,7 +170,7 @@ export class ConnectorService extends BaseService {
     return this.httpPostWithReturn(endpoint, connectorPayload);
   }
 
-  public validateFilters(baseHref: string, filterPayload: ConnectorConfig, connectorId: string,): Promise<any> {
+  public validateFilters(baseHref: string, filterPayload: Record<string,string>, connectorId: string,): Promise<any> {
     this.logger?.info(`[ConnectorService] Validate the filter properties and get the applied filter response from database`);
 
     const endpoint: string = this.endpoint(
