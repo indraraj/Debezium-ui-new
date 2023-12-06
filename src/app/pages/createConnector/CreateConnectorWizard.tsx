@@ -36,6 +36,7 @@ import { getConnectorClass, isEmpty } from "@app/utils";
 import usePostWithReturnApi from "@app/hooks/usePostWithReturnApi";
 import { CustomPropertiesStep } from "./CustomPropertiesStep";
 import { ConnectorTypeLogo } from "@app/components";
+import TransformationStep from "./TransformationStep";
 
 export const CreateConnectorWizard: React.FunctionComponent = () => {
   let { connectorPlugin } = useParams();
@@ -68,7 +69,9 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
 
   const [customPropFormData, setCustomPropFormData] = React.useState<
     Record<string, any>
-  >({ "": "" });
+  >({});
+
+  const [isCustomPropertiesDirty, setIsCustomPropertiesDirty] = useState(false);
 
   const [connectionValidationStatus, setConnectionValidationStatus] = useState<
     boolean | undefined
@@ -86,6 +89,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
           setConnectorName({ [key]: value });
           break;
         case FormStep.CONNECTION:
+          setConnectionValidationStatus(undefined);
           setConnectionFormData(
             cloneDeep({ ...connectionFormData, [key]: value })
           );
@@ -116,6 +120,17 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
       customPropFormData,
     ]
   );
+
+  const updateCustomFormData = useCallback(
+    (formData: Record<string, string>) => {
+      setCustomPropFormData(cloneDeep({ ...formData }));
+    },
+    []
+  );
+
+  const updateCustomFormDirty = useCallback((isDirty: boolean) => {
+    setIsCustomPropertiesDirty(isDirty);
+  }, []);
 
   const navigate = useNavigate();
 
@@ -213,7 +228,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
   });
 
   const filterProperties = filter(allConnectorProperties, {
-    "x-category": "FILTERS",
+    "x-category": PropertyCategory.FILTERS,
   });
 
   const filterDatabasePost = usePostWithReturnApi<any>();
@@ -246,7 +261,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
         ...connectionFormData,
         ...filterFormData,
       },
-      "mysql"
+      connectorPlugin
     );
   }, [filterFormData, connectionFormData, connectorName]);
 
@@ -261,12 +276,11 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
         "connector.class": getConnectorClass(connectorPlugin),
         ...connectionFormData,
       },
-      "mysql"
+      connectorPlugin
     );
   }, [filterFormData, connectionFormData, connectorName]);
 
   const clearFilterFormData = useCallback(() => {
-    console.log("clearFilterFormData");
     setFilterFormData({});
   }, []);
 
@@ -345,7 +359,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
             "connector.class": getConnectorClass(connectorPlugin),
             ...connectionFormData,
           },
-          "mysql"
+          connectorPlugin!
         )
         .then((validationResponse: any) => {
           scrollToTop();
@@ -362,7 +376,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
               );
               setConnectionValidationMessage(invalidProp.join(", "));
             }
-          }else{
+          } else {
             setConnectionValidationStatus(true);
             // setConnectionValidationMessage(" validation valid");
           }
@@ -375,6 +389,11 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
         });
     }
 
+    const onNext = () => {
+      setConnectionValidationStatus(undefined);
+      goToNextStep();
+    };
+
     return (
       <WizardFooterWrapper>
         <Button variant="secondary" onClick={goToPrevStep} isDisabled={true}>
@@ -382,7 +401,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
         </Button>
         <Button
           variant="primary"
-          onClick={goToNextStep}
+          onClick={onNext}
           isDisabled={!connectionFilled || isLoading}
         >
           Next
@@ -571,7 +590,13 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
                 key="wizard-step-2b"
                 isHidden={locationData.hideAdvance || false}
               >
-                <p>Transformation step </p>
+                <p>Transform step</p>
+                {/* <TransformationStep
+                formData={customPropFormData}
+                updateFormData={updateCustomFormData}
+                isCustomPropertiesDirty={isCustomPropertiesDirty}
+                updateCustomFormDirty={updateCustomFormDirty}
+                /> */}
               </WizardStep>,
               <WizardStep
                 name="Topic creation"
@@ -618,7 +643,9 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
               >
                 <CustomPropertiesStep
                   formData={customPropFormData}
-                  updateFormData={updateFormData}
+                  updateFormData={updateCustomFormData}
+                  isCustomPropertiesDirty={isCustomPropertiesDirty}
+                  updateCustomFormDirty={updateCustomFormDirty}
                   connectorProperties={{
                     ...connectionFormData,
                     ...filterFormData,
