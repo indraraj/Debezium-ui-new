@@ -36,7 +36,7 @@ import { getConnectorClass, isEmpty } from "@app/utils";
 import usePostWithReturnApi from "@app/hooks/usePostWithReturnApi";
 import { CustomPropertiesStep } from "./CustomPropertiesStep";
 import { ConnectorTypeLogo } from "@app/components";
-import TransformationStep from "./TransformationStep";
+// import TransformationStep from "./TransformationStep";
 
 export const CreateConnectorWizard: React.FunctionComponent = () => {
   let { connectorPlugin } = useParams();
