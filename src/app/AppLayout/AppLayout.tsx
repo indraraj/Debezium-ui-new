@@ -465,7 +465,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         {/* {PageTemplateTitle} */}
         {children}
       </Page>
-      <PageSection variant={PageSectionVariants.light}>
         <AlertGroup
           isToast
           isLiveRegion
@@ -474,7 +473,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         >
           {alerts.slice(0, maxDisplayed)}
         </AlertGroup>
-      </PageSection>
     </AppLayoutContext.Provider>
   );
 };

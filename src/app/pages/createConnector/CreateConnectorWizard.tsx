@@ -332,7 +332,6 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
   );
 
   const scrollToTop = () => {
-    console.log("scroll to top");
     if (ref.current) {
       ref.current.scrollIntoView({ behavior: "smooth" });
     }
@@ -493,6 +492,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
 
   return (
     <>
+    <div ref={ref}> </div>
       {PageTemplateTitle}
       <PageSection isFilled type={PageSectionTypes.wizard}>
         <Wizard
@@ -536,7 +536,7 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
                 <Skeleton />
               </React.Fragment>
             ) : (
-              <div ref={ref}>
+              <div>
                 {isUndefined(connectionValidationStatus) ? (
                   <></>
                 ) : connectionValidationStatus ? (
@@ -689,11 +689,11 @@ export const CreateConnectorWizard: React.FunctionComponent = () => {
             />
           </WizardStep>
         </Wizard>
-        {/* <BackToTop
+        <BackToTop
           isAlwaysVisible
           onClick={scrollToTop}
           style={{ zIndex: 9999 }}
-        /> */}
+        />
         <Modal
           variant={ModalVariant.small}
           title={`Delete connector?`}
