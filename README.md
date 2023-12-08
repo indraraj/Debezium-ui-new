@@ -9,7 +9,8 @@ Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/
 
 # Debezium UI
 
-![WEB UI SAMPLE](https://user-images.githubusercontent.com/10202690/114378465-05cb5000-9b88-11eb-9914-a8dd5b3994ae.png)
+![image](https://github.com/indraraj/Debezium-ui-new/assets/8264372/87604d4b-034c-4d0d-8825-4dbede1096e7)
+
 
 Debezium is an open source distributed platform for change data capture (CDC).
 
